@@ -23,7 +23,9 @@ main:
 	mov r16, 1 //ancora para leitura (ptr + r16*4)
  	shl r16, 2 // r16*4
   	mov r17, [r15 + r16] // r17 = file[r16], leitura primeiro inteiro do arquivo
-   	
+   	lea rsi, [rip + inteiro] // argumento 1 printf
+    	mov rdi, rdi
+     	call prinf@plt
   	
 	
 
