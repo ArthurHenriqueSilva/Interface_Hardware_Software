@@ -10,12 +10,23 @@ main:
 	mov rbp, rsp
 	
 	//ler nome do arquivo_entrada(argv[1])
-	mov r12, [rsi+8] //guarda valor de argv[1]
+	mov r12, rsi //guardar argv
+	mov r13, [rsi+8] //guarda valor de argv[1]
 	lea rsi, [rip + leitura] // argumento 1 para fopen
-	mov rdi, r12 //argumento 2 para fopen
+	mov rdi, r13 //argumento 2 para fopen
 	call fopen@plt
-	mov r13, rax // guarda ponteiro do arquivo em r13
-	mov r14, [r13 + 4]  //variavel de loop externo(int) (primeira linha do arquivo)
+	mov r14, rax // guarda ponteiro do arquivo
+	mov rsi, r14 //argumento 1 para fscanf
+	lea rdi, [rip + inteiro] //argumento 2 para fscanf
+	call fscanf@plt
+	mov r15, rax // guarda ponteiro de dentro do arquivo
+	mov r16, 1 //ancora para leitura (ptr + r16*4)
+ 	shl r16, 2 // r16*4
+  	mov r17, [r15 + r16] // r17 = file[r16], leitura primeiro inteiro do arquivo
+   	
+  	
+	
+
 
 	
 	
@@ -24,3 +35,5 @@ main:
 
 leitura:
 	.string "r\n"
+inteiro:
+	.string "%d\n"
