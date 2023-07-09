@@ -1,5 +1,5 @@
 .intel_syntax noprefix
-
+gcc -Wall primeiro_teste.s -o primeiro_teste.bin
 
 .section .text
 //Main function
