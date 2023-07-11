@@ -1,3 +1,4 @@
+
 .intel_syntax noprefix
 
 .section .text
@@ -8,20 +9,16 @@ main:
     push rbp
     mov rbp, rsp
     //reserva memoria na pilha
-    sub rsp, 16
-
-    
+    sub rsp, 16    
     // ler nome do arquivo_entrada(argv[1])
     // guardar argv
     mov r12, rsi
     // guarda valor de argv[1]
     mov r13, [rsi+8]
     // argumento 1 para fopen
-    lea rdi, [rip + leitura] 
+    mov rdi, r13
     // argumento 2 para fopen
-    mov rsi, r13 
-    
-
+    lea rsi, [rip + leitura] 
     // abrir arquivo_entrada
     call fopen@plt
     // guarda ponteiro do arquivo
@@ -32,20 +29,14 @@ main:
     lea rsi, [rip + inteiro] 
     call fscanf@plt
     // guarda ponteiro de dentro do arquivo. r15 = ptr
-    mov r15, rax
+    mov r15, rdx
     // ancora para leitura (ptr + r16*4)
-    mov r16, 1
-    // r16*4
-    shl r16, 2
-    // r17 = file[r16], leitura primeiro inteiro do arquivo
-    mov r17, [r15 + r16]
+    
     // argumento 1 printf
-    mov rdi, r17
+    lea rdi, dword ptr[r15 + 4]   
     //argumento 2 printf
     lea rsi, [rip + inteiro] 
     call printf@plt
-
-
 
 .section .rodata
 leitura:
