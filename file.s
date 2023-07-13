@@ -45,7 +45,7 @@ main:
         ret
         
 .section .rodata
-leitura:
+readmode:
     .string "r\n"
-inteiro:
+format:
     .string "%d\n"
