@@ -6,10 +6,11 @@
 .global main
 main:
     // registro de pilha
-    push rbp
-    mov rbp, rsp
-    //reserva memoria na pilha
-    sub rsp, 16    
+    prologue:
+	push rbp
+    	mov rbp, rsp
+    	//reserva memoria na pilha
+    	sub rsp, 16    
     // ler nome do arquivo_entrada(argv[1])
     // guardar argv
     mov r12, rsi
