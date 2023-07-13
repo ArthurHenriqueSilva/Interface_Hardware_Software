@@ -6,11 +6,10 @@
 .global main
 main:
     // registro de pilha
-    prologue:
-	push rbp
-    	mov rbp, rsp
-    	//reserva memoria na pilha
-    	sub rsp, 16    
+    push rbp
+    mov rbp, rsp
+    //reserva memoria na pilha
+    sub rsp, 16    
     // ler nome do arquivo_entrada(argv[1])
     // guardar argv
     mov r12, rsi
@@ -19,7 +18,7 @@ main:
     // argumento 1 para fopen
     mov rdi, r13
     // argumento 2 para fopen
-    lea rsi, [rip + leitura] 
+    lea rsi, [rip + readmode] 
     // abrir arquivo_entrada
     call fopen@plt
     // guarda ponteiro do arquivo
@@ -27,25 +26,25 @@ main:
     // argumento 1 para fscanf
     mov rdi, r14
     // argumento 2 para fscanf
-    lea rsi, [rip + inteiro]
+    lea rsi, [rip + intformat]
     lea rdx, [rbp - 16]
     call fscanf@plt
     // guarda ponteiro de dentro do arquivo. r15 = ptr
     mov r15, rdx
     // ancora para leitura (ptr + r16*4)
-    
+
     // argumento 1 printf
-    lea rsi, [r15 + 4]   
+    lea rsi, [r15 + 4]
     //argumento 2 printf
-    lea rdi, [rip + inteiro] 
+    lea rsi, [rip + readmode]
     call printf@plt
-    epilogue:
-        mov rsp, rbp
-        pop rbp
-        ret
+    xor rax, rax
+    mov rsp, rbp
+    pop rbp
+    	ret
         
 .section .rodata
 readmode:
     .string "r\n"
-format:
+intformat:
     .string "%d\n"
