@@ -29,14 +29,12 @@ main:
     lea rsi, [rip + intformat]
     lea rdx, [rbp - 16]
     call fscanf@plt
-    // guarda ponteiro de dentro do arquivo. r15 = ptr
     mov r15, rdx
-    // ancora para leitura (ptr + r16*4)
 
     // argumento 1 printf
-    lea rsi, [r15 + 4]
+    mov rsi, [r15 + 4]
     //argumento 2 printf
-    lea rsi, [rip + intformat]
+    lea rdi, [rip + intformat]
     call printf@plt
     xor rax, rax
     mov rsp, rbp
