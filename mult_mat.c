@@ -9,6 +9,7 @@ typedef struct {
     int numColsB;
     int** matrixA;
     int** matrixB;
+    char* outputFilename;
 } MatrixData;
 
 void* matrixMultiply(void* arg) {
@@ -19,6 +20,7 @@ void* matrixMultiply(void* arg) {
     int numColsB = data->numColsB;
     int** matrixA = data->matrixA;
     int** matrixB = data->matrixB;
+    char* outputFilename = data->outputFilename;
     int** matrixC = (int**)malloc(numRowsA * sizeof(int*));
 
     for (int i = 0; i < numRowsA; i++) {
@@ -31,11 +33,9 @@ void* matrixMultiply(void* arg) {
         }
     }
 
-    char filename[20];
-    sprintf(filename, "output%d.txt", index);
-    FILE* outputFile = fopen(filename, "w");
+    FILE* outputFile = fopen(outputFilename, "a");
     if (outputFile == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo de saída %s\n", filename);
+        fprintf(stderr, "Erro ao abrir o arquivo de saída %s\n", outputFilename);
         exit(EXIT_FAILURE);
     }
 
@@ -56,10 +56,18 @@ void* matrixMultiply(void* arg) {
     pthread_exit(NULL);
 }
 
-int main() {
-    FILE* inputFile = fopen("input.txt", "r");
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Uso incorreto. Sintaxe correta: %s arquivo_entrada arquivo_saida\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    char* inputFilename = argv[1];
+    char* outputFilename = argv[2];
+
+    FILE* inputFile = fopen(inputFilename, "r");
     if (inputFile == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo de entrada\n");
+        fprintf(stderr, "Erro ao abrir o arquivo de entrada: %s\n", inputFilename);
         exit(EXIT_FAILURE);
     }
 
@@ -79,6 +87,7 @@ int main() {
         matrixData[i].numColsB = numColsB;
         matrixData[i].matrixA = (int**)malloc(numRowsA * sizeof(int*));
         matrixData[i].matrixB = (int**)malloc(numColsA * sizeof(int*));
+        matrixData[i].outputFilename = outputFilename;
 
         for (int j = 0; j < numRowsA; j++) {
             matrixData[i].matrixA[j] = (int*)malloc(numColsA * sizeof(int));
