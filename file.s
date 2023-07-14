@@ -36,13 +36,13 @@ main:
     // argumento 1 printf
     lea rsi, [r15 + 4]
     //argumento 2 printf
-    lea rsi, [rip + readmode]
+    lea rsi, [rip + intformat]
     call printf@plt
     xor rax, rax
     mov rsp, rbp
     pop rbp
-    	ret
-        
+    ret
+
 .section .rodata
 readmode:
     .string "r\n"
