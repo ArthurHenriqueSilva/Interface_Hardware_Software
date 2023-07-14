@@ -46,6 +46,7 @@ void* matrixMultiply(void* arg) {
         }
         fprintf(outputFile, "\n");
     }
+    fprintf(outputFile, "\n");
 
     fclose(outputFile);
     for (int i = 0; i < numRowsA; i++) {
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
         int numRowsA, numColsA, numColsB;
         fscanf(inputFile, "%d %d %d", &numRowsA, &numColsA, &numColsB);
 
-        matrixData[i].matrixIndex = i + 1;
+        matrixData[i].matrixIndex = i;
         matrixData[i].numRowsA = numRowsA;
         matrixData[i].numColsA = numColsA;
         matrixData[i].numColsB = numColsB;
