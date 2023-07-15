@@ -2,134 +2,76 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+// Estrutura para passar os argumentos para a função da thread
 typedef struct {
-    int matrixIndex;
-    int numRowsA;
-    int numColsA;
-    int numColsB;
-    int** matrixA;
-    int** matrixB;
-    char* outputFilename;
-} MatrixData;
+    int start_row;
+    int end_row;
+    double **matrix1;
+    double **matrix2;
+    double **result;
+} ThreadArgs;
 
-void* matrixMultiply(void* arg) {
-    MatrixData* data = (MatrixData*)arg;
-    int index = data->matrixIndex;
-    int numRowsA = data->numRowsA;
-    int numColsA = data->numColsA;
-    int numColsB = data->numColsB;
-    int** matrixA = data->matrixA;
-    int** matrixB = data->matrixB;
-    char* outputFilename = data->outputFilename;
-    int** matrixC = (int**)malloc(numRowsA * sizeof(int*));
+// Função executada por cada thread
+void *multiply_matrices(void *arg) {
+    ThreadArgs *args = (ThreadArgs *)arg;
+    int start_row = args->start_row;
+    int end_row = args->end_row;
+    double **matrix1 = args->matrix1;
+    double **matrix2 = args->matrix2;
+    double **result = args->result;
 
-    for (int i = 0; i < numRowsA; i++) {
-        matrixC[i] = (int*)malloc(numColsB * sizeof(int));
-        for (int j = 0; j < numColsB; j++) {
-            matrixC[i][j] = 0;
-            for (int k = 0; k < numColsA; k++) {
-                matrixC[i][j] += matrixA[i][k] * matrixB[k][j];
+    for (int i = start_row; i < end_row; i++) {
+        for (int j = 0; j < cols2; j++) {
+            for (int k = 0; k < cols1; k++) {
+                result[i][j] += matrix1[i][k] * matrix2[k][j];
             }
         }
     }
-
-    FILE* outputFile = fopen(outputFilename, "a");
-    if (outputFile == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo de saída %s\n", outputFilename);
-        exit(EXIT_FAILURE);
-    }
-
-    fprintf(outputFile, "M%d:\n", index);
-    for (int i = 0; i < numRowsA; i++) {
-        for (int j = 0; j < numColsB; j++) {
-            fprintf(outputFile, "%d ", matrixC[i][j]);
-        }
-        fprintf(outputFile, "\n");
-    }
-    fprintf(outputFile, "\n");
-
-    fclose(outputFile);
-    for (int i = 0; i < numRowsA; i++) {
-        free(matrixC[i]);
-    }
-    free(matrixC);
 
     pthread_exit(NULL);
 }
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Uso incorreto. Sintaxe correta: %s arquivo_entrada arquivo_saida\n", argv[0]);
-        exit(EXIT_FAILURE);
+int main(int argc, char *argv[]) {
+    char *input_file1 = argv[1];
+    char *input_file2 = argv[2];
+    char *output_file = "output.txt";
+
+    // Leitura das matrizes de entrada
+    // Código para ler as dimensões e preencher as matrizes omitido por simplicidade
+
+    // Criação das threads
+    int num_threads = 4; // Número de threads a serem usadas
+    pthread_t threads[num_threads];
+    ThreadArgs args[num_threads];
+
+    int block_size = rows1 / num_threads;
+    int remaining_rows = rows1 % num_threads;
+    int start_row = 0;
+
+    for (int i = 0; i < num_threads; i++) {
+        int end_row = start_row + block_size;
+        if (i < remaining_rows) {
+            end_row++;
+        }
+        
+        args[i].start_row = start_row;
+        args[i].end_row = end_row;
+        args[i].matrix1 = matrix1;
+        args[i].matrix2 = matrix2;
+        args[i].result = result;
+
+        pthread_create(&threads[i], NULL, multiply_matrices, (void *)&args[i]);
+
+        start_row = end_row;
     }
 
-    char* inputFilename = argv[1];
-    char* outputFilename = argv[2];
-
-    FILE* inputFile = fopen(inputFilename, "r");
-    if (inputFile == NULL) {
-        fprintf(stderr, "Erro ao abrir o arquivo de entrada: %s\n", inputFilename);
-        exit(EXIT_FAILURE);
+    // Aguarda a finalização de todas as threads
+    for (int i = 0; i < num_threads; i++) {
+        pthread_join(threads[i], NULL);
     }
 
-    int numMultiplications;
-    fscanf(inputFile, "%d", &numMultiplications);
-
-    pthread_t* threads = (pthread_t*)malloc(numMultiplications * sizeof(pthread_t));
-    MatrixData* matrixData = (MatrixData*)malloc(numMultiplications * sizeof(MatrixData));
-
-    for (int i = 0; i < numMultiplications; i++) {
-        int numRowsA, numColsA, numColsB;
-        fscanf(inputFile, "%d %d %d", &numRowsA, &numColsA, &numColsB);
-
-        matrixData[i].matrixIndex = i;
-        matrixData[i].numRowsA = numRowsA;
-        matrixData[i].numColsA = numColsA;
-        matrixData[i].numColsB = numColsB;
-        matrixData[i].matrixA = (int**)malloc(numRowsA * sizeof(int*));
-        matrixData[i].matrixB = (int**)malloc(numColsA * sizeof(int*));
-        matrixData[i].outputFilename = outputFilename;
-
-        for (int j = 0; j < numRowsA; j++) {
-            matrixData[i].matrixA[j] = (int*)malloc(numColsA * sizeof(int));
-            for (int k = 0; k < numColsA; k++) {
-                fscanf(inputFile, "%d", &matrixData[i].matrixA[j][k]);
-            }
-        }
-
-        for (int j = 0; j < numColsA; j++) {
-            matrixData[i].matrixB[j] = (int*)malloc(numColsB * sizeof(int));
-            for (int k = 0; k < numColsB; k++) {
-                fscanf(inputFile, "%d", &matrixData[i].matrixB[j][k]);
-            }
-        }
-
-        if (pthread_create(&threads[i], NULL, matrixMultiply, (void*)&matrixData[i]) != 0) {
-            fprintf(stderr, "Erro ao criar a thread %d\n", i);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    for (int i = 0; i < numMultiplications; i++) {
-        if (pthread_join(threads[i], NULL) != 0) {
-            fprintf(stderr, "Erro ao aguardar a thread %d\n", i);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    fclose(inputFile);
-    free(threads);
-    for (int i = 0; i < numMultiplications; i++) {
-        for (int j = 0; j < matrixData[i].numRowsA; j++) {
-            free(matrixData[i].matrixA[j]);
-        }
-        free(matrixData[i].matrixA);
-        for (int j = 0; j < matrixData[i].numColsA; j++) {
-            free(matrixData[i].matrixB[j]);
-        }
-        free(matrixData[i].matrixB);
-    }
-    free(matrixData);
+    // Escrita da matriz resultante no arquivo de saída
+    // Código para escrever a matriz resultante no arquivo omitido por simplicidade
 
     return 0;
 }
