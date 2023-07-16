@@ -28,13 +28,12 @@ void *multiply_matrices(void *arg) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+    if (argc != 2) {
+        printf("Usage: %s <input_file>\n", argv[0]);
         return 1;
     }
 
     char *input_file = argv[1];
-    char *output_file = argv[2];
 
     // Leitura das matrizes de entrada
     FILE *input = fopen(input_file, "r");
@@ -83,16 +82,14 @@ int main(int argc, char *argv[]) {
         pthread_join(threads[i], NULL);
     }
 
-    // Grava o resultado no arquivo de saída
-    FILE *output = fopen(output_file, "w");
+    // Imprime os resultados na tela
     for (int i = 0; i < num_rows1; i++) {
-        fprintf(output, "M%d:\n", i);
+        printf("M%d:\n", i);
         for (int j = 0; j < num_cols2; j++) {
-            fprintf(output, "  %.2lf", result[i][j]);
+            printf("  %.2lf", result[i][j]);
         }
-        fprintf(output, "\n");
+        printf("\n");
     }
-    fclose(output);
 
     // Libera a memória alocada
     for (int i = 0; i < num_matrices; i++) {
