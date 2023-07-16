@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-// Estrutura para passar os argumentos para a função da thread
 typedef struct {
     int start_row;
     int end_row;
@@ -11,7 +10,6 @@ typedef struct {
     double **result;
 } ThreadArgs;
 
-// Função executada por cada thread
 void *multiply_matrices(void *arg) {
     ThreadArgs *args = (ThreadArgs *)arg;
     int start_row = args->start_row;
