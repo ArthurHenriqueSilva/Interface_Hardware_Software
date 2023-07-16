@@ -3,8 +3,9 @@
 #include <pthread.h>
 
 typedef struct {
-    int start_row;
-    int end_row;
+    int row;
+    int col;
+    int size;
     double **matrix1;
     double **matrix2;
     double **result;
@@ -12,64 +13,102 @@ typedef struct {
 
 void *multiply_matrices(void *arg) {
     ThreadArgs *args = (ThreadArgs *)arg;
-    int start_row = args->start_row;
-    int end_row = args->end_row;
+    int row = args->row;
+    int col = args->col;
+    int size = args->size;
     double **matrix1 = args->matrix1;
     double **matrix2 = args->matrix2;
     double **result = args->result;
 
-    for (int i = start_row; i < end_row; i++) {
-        for (int j = 0; j < cols2; j++) {
-            for (int k = 0; k < cols1; k++) {
-                result[i][j] += matrix1[i][k] * matrix2[k][j];
-            }
-        }
+    for (int k = 0; k < size; k++) {
+        result[row][col] += matrix1[row][k] * matrix2[k][col];
     }
 
     pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[]) {
-    char *input_file1 = argv[1];
-    char *input_file2 = argv[2];
-    char *output_file = "output.txt";
+    if (argc != 3) {
+        printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+        return 1;
+    }
+
+    char *input_file = argv[1];
+    char *output_file = argv[2];
 
     // Leitura das matrizes de entrada
-    // Código para ler as dimensões e preencher as matrizes omitido por simplicidade
+    FILE *input = fopen(input_file, "r");
+    int num_matrices;
+    fscanf(input, "%d", &num_matrices);
 
-    // Criação das threads
-    int num_threads = 4; // Número de threads a serem usadas
-    pthread_t threads[num_threads];
-    ThreadArgs args[num_threads];
-
-    int block_size = rows1 / num_threads;
-    int remaining_rows = rows1 % num_threads;
-    int start_row = 0;
-
-    for (int i = 0; i < num_threads; i++) {
-        int end_row = start_row + block_size;
-        if (i < remaining_rows) {
-            end_row++;
+    // Criação das matrizes
+    double ***matrices = (double ***)malloc(num_matrices * sizeof(double **));
+    for (int i = 0; i < num_matrices; i++) {
+        int rows, cols;
+        fscanf(input, "%d %d", &rows, &cols);
+        matrices[i] = (double **)malloc(rows * sizeof(double *));
+        for (int j = 0; j < rows; j++) {
+            matrices[i][j] = (double *)malloc(cols * sizeof(double));
+            for (int k = 0; k < cols; k++) {
+                fscanf(input, "%lf", &matrices[i][j][k]);
+            }
         }
-        
-        args[i].start_row = start_row;
-        args[i].end_row = end_row;
-        args[i].matrix1 = matrix1;
-        args[i].matrix2 = matrix2;
-        args[i].result = result;
+    }
+    fclose(input);
 
-        pthread_create(&threads[i], NULL, multiply_matrices, (void *)&args[i]);
+    // Multiplicação das matrizes
+    int num_rows1 = 0, num_cols1 = 0, num_rows2 = 0, num_cols2 = 0;
+    double **matrix1 = matrices[0];
+    double **matrix2 = matrices[1];
+    double **result = (double **)malloc(num_rows1 * sizeof(double *));
+    pthread_t *threads = (pthread_t *)malloc(num_rows1 * num_cols2 * sizeof(pthread_t));
+    ThreadArgs *args = (ThreadArgs *)malloc(num_rows1 * num_cols2 * sizeof(ThreadArgs));
 
-        start_row = end_row;
+    for (int i = 0; i < num_rows1; i++) {
+        result[i] = (double *)calloc(num_cols2, sizeof(double));
+        for (int j = 0; j < num_cols2; j++) {
+            args[i * num_cols2 + j].row = i;
+            args[i * num_cols2 + j].col = j;
+            args[i * num_cols2 + j].size = num_cols1;
+            args[i * num_cols2 + j].matrix1 = matrix1;
+            args[i * num_cols2 + j].matrix2 = matrix2;
+            args[i * num_cols2 + j].result = result;
+
+            pthread_create(&threads[i * num_cols2 + j], NULL, multiply_matrices, (void *)&args[i * num_cols2 + j]);
+        }
     }
 
     // Aguarda a finalização de todas as threads
-    for (int i = 0; i < num_threads; i++) {
+    for (int i = 0; i < num_rows1 * num_cols2; i++) {
         pthread_join(threads[i], NULL);
     }
 
-    // Escrita da matriz resultante no arquivo de saída
-    // Código para escrever a matriz resultante no arquivo omitido por simplicidade
+    // Grava o resultado no arquivo de saída
+    FILE *output = fopen(output_file, "w");
+    for (int i = 0; i < num_rows1; i++) {
+        fprintf(output, "M%d:\n", i);
+        for (int j = 0; j < num_cols2; j++) {
+            fprintf(output, "  %.2lf", result[i][j]);
+        }
+        fprintf(output, "\n");
+    }
+    fclose(output);
+
+    // Libera a memória alocada
+    for (int i = 0; i < num_matrices; i++) {
+        int rows = num_rows1;
+        for (int j = 0; j < rows; j++) {
+            free(matrices[i][j]);
+        }
+        free(matrices[i]);
+    }
+    free(matrices);
+    for (int i = 0; i < num_rows1; i++) {
+        free(result[i]);
+    }
+    free(result);
+    free(threads);
+    free(args);
 
     return 0;
 }
