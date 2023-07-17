@@ -36,11 +36,14 @@ int main(int argc, char *argv[]) {
 		
 		
 		
-		for(int i = 0; i < n; i++){
+		for(int i = 0; i < n1; i++){
 			free(matriz1[i]);
 			free(matriz2[i]);
 		}
 		free(matriz1);
+		for(int i = 0; i < n2; i++){
+			free(matriz2[i]);
+		}
 		free(matriz2);
 	}
 	fclose(input);
