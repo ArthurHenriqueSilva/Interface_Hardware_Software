@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	printf("num_iter = %d\n", num_iter);
 	for(int c = 0; c < num_iter; c++){
 		int n1, m1;
-		fscanf(input, "%d %d", &n, &m);
+		fscanf(input, "%d %d", &n1, &m1);
 		printf("%d %d\n", n1, m1);
 		double **matriz1 = (double **)malloc(n1 * sizeof(double *));
 		for(int i = 0; i < n1; i++ ){
@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
 		}
 
 		int n2, m2;
-		fscanf(input, "%d %d");
+		fscanf(input, "%d %d", &n2, &m2);
 		printf("%d %d\n", n2, m2);
 		double **matriz2 = (double **)malloc(n2 * sizeof(double *));
-		for(int i = 0/ i < n2; i++){
+		for(int i = 0; i < n2; i++){
 			matriz2[i] = (double *)malloc(m2 * sizeof(double));
 			for(int j = 0; j < m2; j++){
 				fscanf(input, "%lf", &matriz2[i][j]);
@@ -40,6 +40,8 @@ int main(int argc, char *argv[]) {
 			free(matriz1[i]);
 			free(matriz2[i]);
 		}
+		free(matriz1);
+		free(matriz2);
 	}
 	fclose(input);
 	return 0;
