@@ -103,14 +103,14 @@ int main(int argc, char* argv[]) {
             td[t].matriz1 = md[c].matriz1;
             td[t].matriz2 = md[c].matriz2;
 
-            if (pthread_create(&threads[c], NULL, multmx, (void*)&td[t]) != 0) {
+            if (pthread_create(&threads[t], NULL, multmx, (void*)&td[t]) != 0) {
                 fprintf(stderr, "Erro ao criar thread %d\n", t);
                 exit(EXIT_FAILURE);
             }
         }
 
         for (int t = 0; t < num_threads; t++) {
-            if (pthread_join(threads[c], NULL) != 0) {
+            if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
             }
         }
