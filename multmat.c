@@ -10,7 +10,7 @@ typedef struct {
 } MatrixData;
 
 typedef struct {
-    int c, start_row, end_row, lm2;
+    int c, start_row, end_row, lm2, start_col, end_col;
     double** result;
     double** matriz1;
     double** matriz2;
@@ -18,30 +18,22 @@ typedef struct {
 
 void* multmx(void* args) {
     ThreadData* td = (ThreadData*)args;
-    int c = td->c;
-    int start_row = td->start_row;
-    int end_row = td->end_row;
-    int lm2 = td->lm2;
-    int valor1, valor2, r;
-    double** result = td->result;
-
+    int r;
     // Inicializa a matriz resultante com zeros
-    for (int i = start_row; i < end_row; i++) {
-        for (int j = 0; j < lm2; j++) {
-            result[i][j] = 0;
+    for (int i = td->start_row; i < td->end_row; i++) {
+        for (int j = td->start_col; j < td->end_col; j++) {
+            td->result[i][j] = 0;
         }
     }
 
     // Realiza a multiplicação das matrizes para a parte atribuída à thread
-    for (int i = start_row; i < end_row; i++) {
-        for (int j = 0; j < lm2; j++) {
+    for (int i = td->start_row; i < td->end_row; i++) {
+        for (int j = td->start_col; j < td->end_col; j++) {
             r = 0;
             for (int k = 0; k < td->m1; k++) {
-                valor1 = td->matriz1[i][k];
-                valor2 = td->matriz2[k][j];
-                r += valor1 * valor2;
+                r += td->matriz1[i][k] * td->matriz2[k][j];
             }
-            result[i][j] = r;
+            td->result[i][j] = r;
         }
     }
 
@@ -53,6 +45,7 @@ int main(int argc, char* argv[]) {
     FILE* input = fopen(argv[1], "r");
     if (access(argv[1], R_OK) != 0) {
         printf("Arquivo nao possui permissao de leitura.\n");
+        return 1;
     }
 
     if (input == NULL) {
@@ -88,7 +81,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        int n = md[c].n1;
+        int n  = md[c].n1;
         int m = md[c].m2;
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
@@ -98,17 +91,23 @@ int main(int argc, char* argv[]) {
         int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
         printf("num_threads %d\n", num_threads);
         int rows_per_thread = n / num_threads;
+        int cols_per_thread = m / num_threads;
         int remaining_rows = n % num_threads;
+        int remaining_cols = m % num_threads;
 
         ThreadData* td = (ThreadData*)malloc(num_threads * sizeof(ThreadData));
         for (int t = 0; t < num_threads; t++) {
             td[t].c = c;
             td[t].start_row = t * rows_per_thread;
             td[t].end_row = (t + 1) * rows_per_thread;
-            td[t].lm2 = md[c].n2;
+            td[t].start_col = t * cols_per_thread;
+            td[t].end_col = (t + 1) * cols_per_thread;
+            
             if (t == num_threads - 1) {
                 td[t].end_row += remaining_rows;
+                td[t].end_col += remaining_cols;
             }
+            td[t].lm2 = md[c].n2;
             td[t].result = result;
             td[t].matriz1 = md[c].matriz1;
             td[t].matriz2 = md[c].matriz2;
@@ -118,29 +117,24 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-
+        
+        for(int i = 0; i < md[c].n1; i++){
+            for(int j = 0; j < md[c].m2; j++){
+                printf("%.2lf ", result[i][j]);
+            }
+            printf("\n");
+        }
         for (int t = 0; t < num_threads; t++) {
             if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
             }
         }
 
-        // Imprimir a matriz resultante após a multiplicação
-        printf("Matriz resultante:\n");
-        for (int i = 0; i < md[c].n1; i++) {
-            for (int j = 0; j < md[c].m2; j++) {
-                printf("%.2lf ", result[i][j]);
-            }
-            printf("\n");
-        }
-
-        // Libera a memória alocada para a matriz result
+        free(td);
         for (int i = 0; i < n; i++) {
             free(result[i]);
         }
         free(result);
-
-        free(td);
     }
 
     fclose(input);
