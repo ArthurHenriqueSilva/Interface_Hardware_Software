@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 
 typedef struct {
     int n1, m1, n2, m2;
@@ -43,8 +44,16 @@ void* multmx(void* args) {
 
 int main(int argc, char* argv[]) {
     printf("Programa comecou!\n");
-    printf("Arquivo de entrada = %s\n", argv[1]);
     FILE* input = fopen(argv[1], "r");
+    if(access(argv[1], R_OK) != 0){
+        printf("Arquivo nao possui permissao de leitura\n");
+    }
+
+    if (input == NULL){
+        printf("FOPEN gerou ponteiro nulo!\n");
+        return 1;
+    }
+    printf("Arquivo de entrada = %s\n", argv[1]);
     int num_iter;
     fscanf(input, "%d", &num_iter);
     printf("num_iter = %d\n", num_iter);
