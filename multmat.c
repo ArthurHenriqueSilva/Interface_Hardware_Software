@@ -79,9 +79,6 @@ int main(int argc, char* argv[]) {
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
             result[i] = (double*)malloc(m * sizeof(double));
-            for (int j = 0; j < m; j++) {
-                result[i][j] = 0; // Inicializa a matriz resultante com zeros
-            }
         }
 
         int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -113,17 +110,35 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-        printf("M%d:\n", c);
+
+        printf("Matriz A:\n");
         for (int i = 0; i < md[c].n1; i++) {
-            for (int j = 0; j < md[c].m2; j++) {
-                printf("%.2lf ", result[i][j]);
+            for (int j = 0; j < md[c].m1; j++) {
+                printf("%.2lf ", md[c].matriz1[i][j]);
             }
             printf("\n");
         }
+
+        printf("Matriz B:\n");
+        for (int i = 0; i < md[c].n2; i++) {
+            for (int j = 0; j < md[c].m2; j++) {
+                printf("%.2lf ", md[c].matriz2[i][j]);
+            }
+            printf("\n");
+        }
+
         for (int t = 0; t < num_threads; t++) {
             if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
             }
+        }
+
+        printf("Matriz Resultante:\n");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                printf("%.2lf ", result[i][j]);
+            }
+            printf("\n");
         }
 
         free(td);
