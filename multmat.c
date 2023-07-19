@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     printf("Programa comecou!\n");
     FILE* input = fopen(argv[1], "r");
     if (access(argv[1], R_OK) != 0) {
-        printf("Arquivo nao possui permissao de leitura\n");
+        printf("Arquivo nao possui permissao de leitura.\n");
     }
 
     if (input == NULL) {
