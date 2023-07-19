@@ -22,20 +22,16 @@ void* multmx(void* args) {
     int start_row = td->start_row;
     int end_row = td->end_row;
     int lm2 = td->lm2;
+    int valor1, valor2, r;
     double** result = td->result;
-
     // Realiza a multiplicação das matrizes para a parte atribuída à thread
     for (int i = start_row; i < end_row; i++) {
         for (int j = start_row; j < end_row; j++) {
-            result[i][j] = 0;
+            r = 0;
             for (int k = 0; k < lm2; k++) {
-
 	        valor1 = td->matriz1[i][k];
-                printf("valor1: %d\n", valor1);
 		valor2 = td->matriz2[k][j];
-		printf("valor2: %d\n", valor2);
-		r = valor1 * valor2ç
-		
+		r = valor1 * valor2;
                 result[i][j] += r;
             }
         }
@@ -84,14 +80,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
-	int p = md[c].m2;
+	int n  = md[c].n1;
+        int m = md[c].m2;
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
             result[i] = (double*)malloc(m * sizeof(double));
         }
 
         int num_threads = sysconf(_SC_NPROCESSORS_ONLN);; // Número de threads para paralelizar uma instância de multiplicação
-        printf("Quantidade de nucleos de processamento que geraram num_threads %d", num_threads);
+        printf("num_threads %d\n", num_threads);
 	int rows_per_thread = n / num_threads;
         int remaining_rows = n % num_threads;
 
@@ -100,7 +97,7 @@ int main(int argc, char* argv[]) {
             td[t].c = c;
             td[t].start_row = t * rows_per_thread;
             td[t].end_row = (t + 1) * rows_per_thread;
-	    td[t].lm2 = md[c].n2
+	    td[t].lm2 = md[c].n2;
             if (t == num_threads - 1) {
                 td[t].end_row += remaining_rows;
             }
@@ -113,7 +110,13 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-
+        
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < m; j++){
+                printf("%.2lf", result[i][j]);
+            }
+            printf("\n");
+        }
         for (int t = 0; t < num_threads; t++) {
             if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
