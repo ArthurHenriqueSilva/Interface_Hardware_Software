@@ -111,8 +111,8 @@ int main(int argc, char* argv[]) {
             }
         }
         
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < m; j++){
+        for(int i = 0; i < md[c].n1; i++){
+            for(int j = 0; j < md[c].m2; j++){
                 printf("%.2lf", result[i][j]);
             }
             printf("\n");
