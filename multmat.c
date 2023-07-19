@@ -10,7 +10,7 @@ typedef struct {
 } MatrixData;
 
 typedef struct {
-    int c, start_row, end_row, lm2, start_col, end_col;
+    int c, start_row, end_row, start_col, end_col;
     double** result;
     double** matriz1;
     double** matriz2;
@@ -23,7 +23,7 @@ void* multmx(void* args) {
     for (int i = td->start_row; i < td->end_row; i++) {
         for (int j = td->start_col; j < td->end_col; j++) {
             r = 0;
-            for (int k = 0; k < td->lm2; k++) {
+            for (int k = td->start_col; k < td->end_col; k++) {
                 r += td->matriz1[i][k] * td->matriz2[k][j];
             }
             td->result[i][j] = r;
