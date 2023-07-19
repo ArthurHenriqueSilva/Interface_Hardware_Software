@@ -24,16 +24,24 @@ void* multmx(void* args) {
     int lm2 = td->lm2;
     int valor1, valor2, r;
     double** result = td->result;
+
+    // Inicializa a matriz resultante com zeros
+    for (int i = start_row; i < end_row; i++) {
+        for (int j = 0; j < lm2; j++) {
+            result[i][j] = 0;
+        }
+    }
+
     // Realiza a multiplicação das matrizes para a parte atribuída à thread
     for (int i = start_row; i < end_row; i++) {
-        for (int j = start_row; j < end_row; j++) {
+        for (int j = 0; j < lm2; j++) {
             r = 0;
-            for (int k = 0; k < lm2; k++) {
-	        valor1 = td->matriz1[i][k];
-		valor2 = td->matriz2[k][j];
-		r = valor1 * valor2;
-                result[i][j] += r;
+            for (int k = 0; k < td->m1; k++) {
+                valor1 = td->matriz1[i][k];
+                valor2 = td->matriz2[k][j];
+                r += valor1 * valor2;
             }
+            result[i][j] = r;
         }
     }
 
@@ -80,16 +88,16 @@ int main(int argc, char* argv[]) {
             }
         }
 
-	int n  = md[c].n1;
+        int n = md[c].n1;
         int m = md[c].m2;
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
             result[i] = (double*)malloc(m * sizeof(double));
         }
 
-        int num_threads = sysconf(_SC_NPROCESSORS_ONLN);; // Número de threads para paralelizar uma instância de multiplicação
+        int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
         printf("num_threads %d\n", num_threads);
-	int rows_per_thread = n / num_threads;
+        int rows_per_thread = n / num_threads;
         int remaining_rows = n % num_threads;
 
         ThreadData* td = (ThreadData*)malloc(num_threads * sizeof(ThreadData));
@@ -97,7 +105,7 @@ int main(int argc, char* argv[]) {
             td[t].c = c;
             td[t].start_row = t * rows_per_thread;
             td[t].end_row = (t + 1) * rows_per_thread;
-	    td[t].lm2 = md[c].n2;
+            td[t].lm2 = md[c].n2;
             if (t == num_threads - 1) {
                 td[t].end_row += remaining_rows;
             }
@@ -110,24 +118,29 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-        
-        for(int i = 0; i < md[c].n1; i++){
-            for(int j = 0; j < md[c].m2; j++){
-                printf("%.2lf", result[i][j]);
-            }
-            printf("\n");
-        }
+
         for (int t = 0; t < num_threads; t++) {
             if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
             }
         }
 
-        free(td);
+        // Imprimir a matriz resultante após a multiplicação
+        printf("Matriz resultante:\n");
+        for (int i = 0; i < md[c].n1; i++) {
+            for (int j = 0; j < md[c].m2; j++) {
+                printf("%.2lf ", result[i][j]);
+            }
+            printf("\n");
+        }
+
+        // Libera a memória alocada para a matriz result
         for (int i = 0; i < n; i++) {
             free(result[i]);
         }
         free(result);
+
+        free(td);
     }
 
     fclose(input);
