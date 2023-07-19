@@ -100,7 +100,6 @@ int main(int argc, char* argv[]) {
                 td[t].end_row += remaining_rows;
                 td[t].end_col += remaining_cols;
             }
-            td[t].lm2 = md[c].n2;
             td[t].result = result;
             td[t].matriz1 = md[c].matriz1;
             td[t].matriz2 = md[c].matriz2;
