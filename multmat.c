@@ -86,7 +86,8 @@ int main(int argc, char* argv[]) {
         }
 
         int num_threads = sysconf(_SC_NPROCESSORS_ONLN);; // Número de threads para paralelizar uma instância de multiplicação
-        int rows_per_thread = n / num_threads;
+        printf("Quantidade de nucleos de processamento que geraram num_threads %d", num_threads);
+	int rows_per_thread = n / num_threads;
         int remaining_rows = n % num_threads;
 
         ThreadData* td = (ThreadData*)malloc(num_threads * sizeof(ThreadData));
