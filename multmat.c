@@ -119,6 +119,7 @@ int main(int argc, char* argv[]) {
         }
         
         for(int i = 0; i < md[c].n1; i++){
+            printf("M%d", c);
             for(int j = 0; j < md[c].m2; j++){
                 printf("%.2lf ", result[i][j]);
             }
