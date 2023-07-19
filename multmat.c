@@ -41,6 +41,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    FILE* output = fopen(argv[2], "w");
+    if (output == NULL) {
+        printf("Erro ao abrir o arquivo de saída.\n");
+        fclose(input);
+        return 1;
+    }
+
     int num_iter;
     fscanf(input, "%d", &num_iter);
     printf("num_iter = %d\n", num_iter);
@@ -114,28 +121,13 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        printf("Matriz A:\n");
-        for (int i = 0; i < md.n1; i++) {
-            for (int j = 0; j < md.m1; j++) {
-                printf("%.2lf ", md.matriz1[i][j]);
-            }
-            printf("\n");
-        }
-
-        printf("Matriz B:\n");
-        for (int i = 0; i < md.n2; i++) {
-            for (int j = 0; j < md.m2; j++) {
-                printf("%.2lf ", md.matriz2[i][j]);
-            }
-            printf("\n");
-        }
-
-        printf("Matriz Resultante:\n");
+        // Escreve a matriz resultante no arquivo de saída
+        fprintf(output, "M%d:\n", c);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                printf("%.2lf ", md.result[i][j]);
+                fprintf(output, "%.2lf ", md.result[i][j]);
             }
-            printf("\n");
+            fprintf(output, "\n");
         }
 
         // Liberação de memória
@@ -157,5 +149,6 @@ int main(int argc, char* argv[]) {
     }
 
     fclose(input);
+    fclose(output);
     return 0;
 }
