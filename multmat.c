@@ -10,7 +10,7 @@ typedef struct {
 } MatrixData;
 
 typedef struct {
-    int c, n, m;
+    int c, n, m, start_row, end_row;
     double** result;
     double** matriz1;
     double** matriz2;
@@ -21,9 +21,12 @@ void* multmx(void* args) {
     int c = td->c;
     int n = td->n;
     int m = td->m;
+    int start_row = td->start_row;
+    int end_row = td->end_row;
     double** result = td->result;
 
-    for (int i = 0; i < n; i++) {
+    // Realiza a multiplicação das matrizes para a parte atribuída à thread
+    for (int i = start_row; i < end_row; i++) {
         for (int j = 0; j < m; j++) {
             result[i][j] = 0;
             for (int k = 0; k < n; k++) {
@@ -32,24 +35,17 @@ void* multmx(void* args) {
         }
     }
 
-    printf("M%d:\n", c);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            printf("%.2lf ", result[i][j]);
-        }
-        printf("\n");
-    }
     pthread_exit(NULL);
 }
 
 int main(int argc, char* argv[]) {
     printf("Programa comecou!\n");
     FILE* input = fopen(argv[1], "r");
-    if(access(argv[1], R_OK) != 0){
+    if (access(argv[1], R_OK) != 0) {
         printf("Arquivo nao possui permissao de leitura\n");
     }
 
-    if (input == NULL){
+    if (input == NULL) {
         printf("FOPEN gerou ponteiro nulo!\n");
         return 1;
     }
@@ -89,24 +85,41 @@ int main(int argc, char* argv[]) {
             result[i] = (double*)malloc(m * sizeof(double));
         }
 
-        ThreadData* td = (ThreadData*)malloc(sizeof(ThreadData));
-        td->c = c;
-        td->n = n;
-        td->m = m;
-        td->result = result;
-        td->matriz1 = md[c].matriz1;
-        td->matriz2 = md[c].matriz2;
+        int num_threads = sysconf(_SC_NPROCESSORS_ONLN);; // Número de threads para paralelizar uma instância de multiplicação
+        int rows_per_thread = n / num_threads;
+        int remaining_rows = n % num_threads;
 
-        if (pthread_create(&threads[c], NULL, multmx, (void*)td) != 0) {
-            fprintf(stderr, "Erro ao criar thread %d\n", c);
-            exit(EXIT_FAILURE);
-        }
-    }
+        ThreadData* td = (ThreadData*)malloc(num_threads * sizeof(ThreadData));
+        for (int t = 0; t < num_threads; t++) {
+            td[t].c = c;
+            td[t].n = n;
+            td[t].m = m;
+            td[t].start_row = t * rows_per_thread;
+            td[t].end_row = (t + 1) * rows_per_thread;
+            if (t == num_threads - 1) {
+                td[t].end_row += remaining_rows;
+            }
+            td[t].result = result;
+            td[t].matriz1 = md[c].matriz1;
+            td[t].matriz2 = md[c].matriz2;
 
-    for (int c = 0; c < num_iter; c++) {
-        if (pthread_join(threads[c], NULL) != 0) {
-            fprintf(stderr, "Erro no join da thread %d\n", c);
+            if (pthread_create(&threads[c], NULL, multmx, (void*)&td[t]) != 0) {
+                fprintf(stderr, "Erro ao criar thread %d\n", t);
+                exit(EXIT_FAILURE);
+            }
         }
+
+        for (int t = 0; t < num_threads; t++) {
+            if (pthread_join(threads[c], NULL) != 0) {
+                fprintf(stderr, "Erro no join da thread %d\n", t);
+            }
+        }
+
+        free(td);
+        for (int i = 0; i < n; i++) {
+            free(result[i]);
+        }
+        free(result);
     }
 
     fclose(input);
