@@ -29,7 +29,7 @@ void* multmx(void* args) {
     for (int i = start_row; i < end_row; i++) {
         for (int j = 0; j < m; j++) {
             result[i][j] = 0;
-            for (int k = 0; k < n; k++) {
+            for (int k = 0; k < td->m2; k++) {
                 result[i][j] += td->matriz1[i][k] * td->matriz2[k][j];
             }
         }
