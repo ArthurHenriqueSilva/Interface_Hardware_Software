@@ -19,13 +19,6 @@ typedef struct {
 void* multmx(void* args) {
     ThreadData* td = (ThreadData*)args;
     int r;
-    // Inicializa a matriz resultante com zeros
-    for (int i = td->start_row; i < td->end_row; i++) {
-        for (int j = td->start_col; j < td->end_col; j++) {
-            td->result[i][j] = 0;
-        }
-    }
-
     // Realiza a multiplicação das matrizes para a parte atribuída à thread
     for (int i = td->start_row; i < td->end_row; i++) {
         for (int j = td->start_col; j < td->end_col; j++) {
@@ -81,11 +74,14 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        int n  = md[c].n1;
+        int n = md[c].n1;
         int m = md[c].m2;
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
             result[i] = (double*)malloc(m * sizeof(double));
+            for (int j = 0; j < m; j++) {
+                result[i][j] = 0; // Inicializa a matriz resultante com zeros
+            }
         }
 
         int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -102,7 +98,7 @@ int main(int argc, char* argv[]) {
             td[t].end_row = (t + 1) * rows_per_thread;
             td[t].start_col = t * cols_per_thread;
             td[t].end_col = (t + 1) * cols_per_thread;
-            
+
             if (t == num_threads - 1) {
                 td[t].end_row += remaining_rows;
                 td[t].end_col += remaining_cols;
@@ -117,21 +113,19 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-
+        printf("M%d:\n", c);
+        for (int i = 0; i < md[c].n1; i++) {
+            for (int j = 0; j < md[c].m2; j++) {
+                printf("%.2lf ", result[i][j]);
+            }
+            printf("\n");
+        }
         for (int t = 0; t < num_threads; t++) {
             if (pthread_join(threads[t], NULL) != 0) {
                 fprintf(stderr, "Erro no join da thread %d\n", t);
             }
         }
-        
-        printf("M%d:\n", c);
-        for(int i = 0; i < md[c].n1; i++){
-            for(int j = 0; j < md[c].m2; j++){
-                printf("%.2lf ", result[i][j]);
-            }
-            printf("\n");
-        }
-        
+
         free(td);
         for (int i = 0; i < n; i++) {
             free(result[i]);
