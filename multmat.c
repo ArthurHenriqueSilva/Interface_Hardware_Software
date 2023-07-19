@@ -117,9 +117,8 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
-        
+        printf("M%d:\n", c);
         for(int i = 0; i < md[c].n1; i++){
-            printf("M%d:\n", c);
             for(int j = 0; j < md[c].m2; j++){
                 printf("%.2lf ", result[i][j]);
             }
