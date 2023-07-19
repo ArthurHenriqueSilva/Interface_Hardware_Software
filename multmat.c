@@ -117,6 +117,13 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
         }
+
+        for (int t = 0; t < num_threads; t++) {
+            if (pthread_join(threads[t], NULL) != 0) {
+                fprintf(stderr, "Erro no join da thread %d\n", t);
+            }
+        }
+        
         printf("M%d:\n", c);
         for(int i = 0; i < md[c].n1; i++){
             for(int j = 0; j < md[c].m2; j++){
@@ -124,12 +131,7 @@ int main(int argc, char* argv[]) {
             }
             printf("\n");
         }
-        for (int t = 0; t < num_threads; t++) {
-            if (pthread_join(threads[t], NULL) != 0) {
-                fprintf(stderr, "Erro no join da thread %d\n", t);
-            }
-        }
-
+        
         free(td);
         for (int i = 0; i < n; i++) {
             free(result[i]);
