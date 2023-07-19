@@ -10,7 +10,7 @@ typedef struct {
 } MatrixData;
 
 typedef struct {
-    int c, n, m, p, start_row, end_row;
+    int c, start_row, end_row, lm2;
     double** result;
     double** matriz1;
     double** matriz2;
@@ -19,18 +19,16 @@ typedef struct {
 void* multmx(void* args) {
     ThreadData* td = (ThreadData*)args;
     int c = td->c;
-    int n = td->n;
-    int m = td->m;
-    int p = td->p;
     int start_row = td->start_row;
     int end_row = td->end_row;
+    int lm2 = td->lm2;
     double** result = td->result;
 
     // Realiza a multiplicação das matrizes para a parte atribuída à thread
     for (int i = start_row; i < end_row; i++) {
-        for (int j = 0; j < m; j++) {
+        for (int j = start_row; j < end_row; j++) {
             result[i][j] = 0;
-            for (int k = 0; k < p; k++) {
+            for (int k = 0; k < lm2; k++) {
                 result[i][j] += td->matriz1[i][k] * td->matriz2[k][j];
             }
         }
@@ -79,8 +77,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        int n = md[c].n1;
-        int m = md[c].m1;
 	int p = md[c].m2;
         double** result = (double**)malloc(n * sizeof(double*));
         for (int i = 0; i < n; i++) {
@@ -95,11 +91,9 @@ int main(int argc, char* argv[]) {
         ThreadData* td = (ThreadData*)malloc(num_threads * sizeof(ThreadData));
         for (int t = 0; t < num_threads; t++) {
             td[t].c = c;
-            td[t].n = n;
-	    td[t].m = m;
-	    td[t].p = p;
             td[t].start_row = t * rows_per_thread;
             td[t].end_row = (t + 1) * rows_per_thread;
+	    td[t].lm2 = md[c].n2
             if (t == num_threads - 1) {
                 td[t].end_row += remaining_rows;
             }
