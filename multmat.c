@@ -30,7 +30,7 @@ void* multmx(void* args) {
     for (int i = td->start_row; i < td->end_row; i++) {
         for (int j = td->start_col; j < td->end_col; j++) {
             r = 0;
-            for (int k = 0; k < td->m1; k++) {
+            for (int k = 0; k < td->lm2; k++) {
                 r += td->matriz1[i][k] * td->matriz2[k][j];
             }
             td->result[i][j] = r;
