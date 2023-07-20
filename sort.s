@@ -29,10 +29,10 @@ main:
     // argumento 3 para fscanf (endereço da variável onde o valor será armazenado)
     lea rdx, [rbp - 8]
     call fscanf@plt
-    mov r15, rdx
+
 
     // argumento 1 printf
-    mov rsi, [r15]  // Correção: removendo o offset de 4 bytes para obter o valor lido corretamente.
+    mov rsi, [rbp - 8]
     // argumento 2 printf
     lea rdi, [rip + intformat]
     call printf@plt
