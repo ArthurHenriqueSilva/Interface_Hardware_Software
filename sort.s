@@ -27,6 +27,7 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
+    //argumento 3 para fscanf
     lea rdx, [rbp - 16]
     call fscanf@plt
     mov r15, rdx
