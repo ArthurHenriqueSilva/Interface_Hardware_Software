@@ -1,4 +1,3 @@
-
 .intel_syntax noprefix
 
 .section .text
@@ -8,7 +7,7 @@ main:
     // registro de pilha
     push rbp
     mov rbp, rsp
-    //reserva memoria na pilha
+    // reserva memoria na pilha
     sub rsp, 16    
     // ler nome do arquivo_entrada(argv[1])
     // guardar argv
@@ -27,14 +26,14 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
-    //argumento 3 para fscanf
-    lea rdx, [rbp - 16]
+    // argumento 3 para fscanf (endereço da variável onde o valor será armazenado)
+    lea rdx, [rbp - 8]
     call fscanf@plt
     mov r15, rdx
 
     // argumento 1 printf
-    mov rsi, [r15 + 4]
-    //argumento 2 printf
+    mov rsi, [r15]  // Correção: removendo o offset de 4 bytes para obter o valor lido corretamente.
+    // argumento 2 printf
     lea rdi, [rip + intformat]
     call printf@plt
     xor rax, rax
