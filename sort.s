@@ -1,34 +1,39 @@
 .intel_syntax noprefix
 
+// Variável para armazenar o número de loops externos
 .section .data
-loop_count:         # Variável para armazenar o número de loops externos
+loop_count:
     .quad 0
 
+// Variável para armazenar o tamanho do array
 .section .bss
-array_size:         # Variável para armazenar o tamanho do array
+array_size:
     .space 4
+
+// Espaço para armazenar o array de inteiros (tamanho máximo de 100 elementos)
 array:
-    .space 100      # Espaço para armazenar o array de inteiros (tamanho máximo de 100 elementos)
+    .space 100
 
 .section .text
 .global main
 
+// Função principal
 main:
     // Registro de pilha
     push rbp
     mov rbp, rsp
 
     // Abrir o arquivo
-    mov rdi, [rsi + 8]          # Argumento argv[1]
-    lea rsi, [rip + read_mode]  # Modo de leitura do arquivo
+    mov rdi, [rsi + 8]          
+    lea rsi, [rip + read_mode]  
     call fopen@plt
-    mov r12, rax                # Salvar o ponteiro do arquivo em r12
+    mov r12, rax                
 
     // Ler o número de loops externos
     call read_integer
     mov qword ptr [loop_count], rax
 
-    // Loop externo
+// Loop externo
 .loop_externo:
     // Ler o tamanho do array
     call read_integer
@@ -62,13 +67,14 @@ main:
     mov rdi, r12
     call fclose@plt
 
+// Fim do programa
 .exit:
     // Limpar a pilha e sair do programa
     mov rsp, rbp
     pop rbp
     ret
 
-# Função para ler um número inteiro do arquivo
+// Função para ler um número inteiro do arquivo
 read_integer:
     push rax
     push rcx
@@ -77,12 +83,12 @@ read_integer:
 .read_loop:
     mov rcx, 10
     mov rdi, r12
-    lea rsi, [rsp + 2]  # Buffer temporário na pilha
+    lea rsi, [rsp + 2]  
     mov rdx, 1
     call fread@plt
 
     mov al, byte ptr [rsp + 2]
-    cmp al, 10         # Caractere de nova linha
+    cmp al, 10         
     je .read_done
 
     imul rax, rax, 10
@@ -97,7 +103,7 @@ read_integer:
     pop rax
     ret
 
-# Função para ler um array de inteiros do arquivo
+// Função para ler um array de inteiros do arquivo
 read_array:
     push rax
     push rbx
@@ -105,11 +111,11 @@ read_array:
     push rsi
     push rdx
 
-    xor rbx, rbx          # Índice do array
-    mov rsi, rdi          # Ponteiro para o buffer temporário
+    xor rbx, rbx          
+    mov rsi, rdi          
 
 .read_array_loop:
-    call read_integer     # Ler um número inteiro do arquivo
+    call read_integer     
     mov [rsi + rbx*4], eax
     inc rbx
     cmp rbx, rdx
@@ -122,7 +128,7 @@ read_array:
     pop rax
     ret
 
-# Função de ordenação do array usando Bubble Sort
+// Função de ordenação do array usando Bubble Sort
 bubble_sort:
     push rax
     push rbx
@@ -130,35 +136,37 @@ bubble_sort:
     push rdx
     push rsi
 
-    mov rbx, rdx           # rbx = tamanho do array
-    dec rbx                # Último índice do array
-    mov rcx, rbx           # rcx = contador
+    mov rbx, rdx           
+    dec rbx                
+    mov rcx, rbx           
 
 .outer_loop:
-    xor rdx, rdx           # rdx = 0 (marcação para trocas)
-    mov rsi, rsi           # rsi = endereço do array
-    mov rax, rbx           # rax = último índice do array
+    xor rdx, rdx           
+    mov rsi, rsi           
+    mov rax, rbx           
 
 .inner_loop:
-    mov eax, [rsi + 4]     # eax = array[i]
-    mov ebx, [rsi]         # ebx = array[i+1]
+    mov eax, [rsi + 4]     
+    mov ebx, [rsi]         
     cmp eax, ebx
     jg .swap_elements
 
 .continue_loop:
-    add rsi, 4             # Incrementa o ponteiro para o próximo elemento
+    add rsi, 4             
     loop .inner_loop
 
-    cmp rdx, 0             # Se rdx = 0, o array está ordenado
+    cmp rdx, 0            
     jz .done
 
-    dec rbx                # Decrementa o último índice do array
+    dec rbx                
     jmp .outer_loop
 
 .swap_elements:
-    mov [rsi], ebx         # array[i] = array[i+1]
-    mov [rsi + 4], eax     # array[i+1] = array[i]
-    mov rdx, 1             # Marca que houve uma troca
+    mov eax, [rsi]         
+    mov ebx, [rsi + 4]     
+    mov [rsi], ebx         
+    mov [rsi + 4], eax     
+    mov rdx, 1             
     jmp .continue_loop
 
 .done:
