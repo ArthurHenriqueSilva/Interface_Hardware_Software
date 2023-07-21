@@ -28,7 +28,7 @@ main:
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
     lea rdx, [rbp - 16]
-    call fscanf@plt]
+    call fscanf@plt
     lea rdi, [rip + output_one_intformat]
     mov rsi, [rbp -  16]
     call printf@plt
