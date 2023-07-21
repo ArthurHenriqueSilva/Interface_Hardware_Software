@@ -28,21 +28,20 @@ main:
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
     lea rdx, [rbp - 16]
-    call fscanf@plt
-    mov r15, rdx
-
-    // argumento 1 printf
-    mov rsi, [r15 + 4]
-    //argumento 2 printf
-    lea rdi, [rip + intformat]
+    call fscanf@plt]
+    lea rdi, [rip + output_one_intformat]
+    mov rsi, [rbp -  16]
     call printf@plt
     xor rax, rax
     mov rsp, rbp
     pop rbp
     ret
 
+
 .section .rodata
 readmode:
-    .string "r\n"
+    .string "r"
 intformat:
+    .string "%d"
+output_one_intformat:
     .string "%d\n"
