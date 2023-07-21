@@ -27,15 +27,31 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
-    lea rdx, [rbp - 16]
+    lea rdx, [rbp - 8]
     call fscanf@plt
-    lea rdi, [rip + output_one_intformat]
-    mov rsi, [rbp -  16]
-    call printf@plt
-    xor rax, rax
-    mov rsp, rbp
-    pop rbp
-    ret
+    //lea rdi, [rip + output_one_intformat]
+    //mov rsi, [rbp -  8]
+    //call printf@plt
+    
+    mov r15, [rbp - 8]
+    //for(i = 0; i < r15; i++)
+    loop_externo_init:
+        // i = 0
+        mov rcx, 0
+    loop_externo:
+        //i<r15
+        cmp rcx, r15
+        je done
+        //i++
+        inc rcx
+        jmp loop_externo
+        
+    mov r15, [rbp - 16]
+    done:
+        xor rax, rax
+        mov rsp, rbp
+        pop rbp
+        ret
 
 
 .section .rodata
