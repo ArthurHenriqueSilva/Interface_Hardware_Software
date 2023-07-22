@@ -27,15 +27,31 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
+    // argumento 3 para fscanf
     lea rdx, [rbp - 16]
     call fscanf@plt
+    // argumento 1 para printf
     lea rdi, [rip + output_one_intformat]
+    // argumento 2 para printf (pega valor da pilha)
     mov rsi, [rbp -  16]
     call printf@plt
-    xor rax, rax
-    mov rsp, rbp
-    pop rbp
-    ret
+    loop_externo_init:
+        mov rcx, 0
+    loop_externo:
+        cmp rcx, [rbp - 16]
+        je done
+        lea rdi, [rip + output_one_intformat]
+        mov rsi, rcx
+        call printf@plt
+        inc rcx
+        jmp loop_externo
+    done:
+        //zera  rax
+        xor rax, rax
+        //reseta pilha
+        mov rsp, rbp
+        pop rbp
+        ret
 
 
 .section .rodata
