@@ -27,6 +27,7 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
+<<<<<<< HEAD
     // argumento 3 para fscanf
     lea rdx, [rbp - 16]
     call fscanf@plt
@@ -49,6 +50,30 @@ main:
         //zera  rax
         xor rax, rax
         //reseta pilha
+=======
+    lea rdx, [rbp - 8]
+    call fscanf@plt
+    //lea rdi, [rip + output_one_intformat]
+    //mov rsi, [rbp -  8]
+    //call printf@plt
+    
+    mov r15, [rbp - 8]
+    //for(i = 0; i < r15; i++)
+    loop_externo_init:
+        // i = 0
+        mov rcx, 0
+    loop_externo:
+        //i<r15
+        cmp rcx, r15
+        je done
+        //i++
+        inc rcx
+        jmp loop_externo
+        
+    mov r15, [rbp - 16]
+    done:
+        xor rax, rax
+>>>>>>> fa620b251e3422a622a0731b6c7a1620852d18e1
         mov rsp, rbp
         pop rbp
         ret
