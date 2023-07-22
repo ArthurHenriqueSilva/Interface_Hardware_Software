@@ -1,6 +1,4 @@
-
 .intel_syntax noprefix
-
 .section .text
 // Main function
 .global main
@@ -56,7 +54,7 @@ main:
     //lea rdi, [rip + output_one_intformat]
     //mov rsi, [rbp -  8]
     //call printf@plt
-    
+
     mov r15, [rbp - 8]
     //for(i = 0; i < r15; i++)
     loop_externo_init:
@@ -69,7 +67,7 @@ main:
         //i++
         inc rcx
         jmp loop_externo
-        
+
     mov r15, [rbp - 16]
     done:
         xor rax, rax
@@ -79,7 +77,7 @@ main:
         ret
 
 
-.section .rodata
+.section .rodata  
 readmode:
     .string "r"
 intformat:
