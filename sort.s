@@ -6,7 +6,7 @@ main:
     // registro de pilha
     push rbp
     mov rbp, rsp
-    //reserva memoria na pilha
+    // reserva memoria na pilha
     sub rsp, 16    
     // ler nome do arquivo_entrada(argv[1])
     // guardar argv
@@ -27,24 +27,26 @@ main:
     lea rsi, [rip + intformat]
     lea rdx, [rbp - 8]
     call fscanf@plt
-    //lea rdi, [rip + output_one_intformat]
-    //mov rsi, [rbp -  8]
-    //call printf@plt
 
     mov r15, [rbp - 8]
-    //for(i = 0; i < r15; i++)
+    // for(i = 0; i < r15; i++)
     loop_externo_init:
         // i = 0
         mov rcx, 0
     loop_externo:
-        //i<r15
+        // i < r15
         cmp rcx, r15
         je done
-        //i++
+
+        // Imprime o valor de rcx
+        mov rdi, rcx
+        lea rsi, [rip + output_one_intformat]
+        call printf@plt
+
+        // i++
         inc rcx
         jmp loop_externo
 
-    mov r15, [rbp - 16]
     done:
         xor rax, rax
         mov rsp, rbp
