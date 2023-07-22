@@ -25,7 +25,6 @@ main:
     mov rdi, r14
     // argumento 2 para fscanf
     lea rsi, [rip + intformat]
-<<<<<<< HEAD
     // argumento 3 para fscanf
     lea rdx, [rbp - 16]
     call fscanf@plt
@@ -48,8 +47,7 @@ main:
         //zera  rax
         xor rax, rax
         //reseta pilha
-=======
-    lea rdx, [rbp - 8]
+rbp - 8]
     call fscanf@plt
     //lea rdi, [rip + output_one_intformat]
     //mov rsi, [rbp -  8]
