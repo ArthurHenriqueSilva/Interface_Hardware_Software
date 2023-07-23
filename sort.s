@@ -40,12 +40,12 @@ main:
         // i < r15
         cmp rcx, r15
         je done
-
+	mov [rbp - 8], rcx
         // Imprime o valor de rcx
         lea rdi, [rip + output_one_intformat]
-        mov rsi, rcx
+        mov rsi, [rbp - 8]
         call printf@plt
-
+	mov rcx, [rbp - 8]
         // i++
         inc rcx
         jmp loop_externo
