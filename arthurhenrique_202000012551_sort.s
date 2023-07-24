@@ -31,26 +31,26 @@ main:
 	lea rdi, [rip + output_one_intformat]
 	mov rsi, [rbp - 16]
 	call printf@plt
-	mov r15, [rbp - 16]
-	// for(i = 0; i < r15; i++)
-	loop_externo_init:
-	    // i = 0
-	    mov rcx, 0
-	loop_externo:
-	    // i < r15
-	    cmp rcx, r15
-	    je done
+	# mov r15, [rbp - 16]
+	# // for(i = 0; i < r15; i++)
+	# loop_externo_init:
+	#     // i = 0
+	#     mov rcx, 0
+	# loop_externo:
+	#     // i < r15
+	#     cmp rcx, r15
+	#     je done
 
-	// Imprime o valor de rcx
-	lea rdi, [rip + output_one_intformat]
-	mov rsi, rcx
-	call printf@plt
+	# // Imprime o valor de rcx
+	# lea rdi, [rip + output_one_intformat]
+	# mov rsi, rcx
+	# call printf@plt
 
-	// i++
-	inc rcx
-	// Salva o valor atual de rcx na memória
-	mov [rbp - 8], rcx
-	jmp loop_externo
+	# // i++
+	# inc rcx
+	# // Salva o valor atual de rcx na memória
+	# mov [rbp - 8], rcx
+	# jmp loop_externo
 
 	done:
 	xor rax, rax
