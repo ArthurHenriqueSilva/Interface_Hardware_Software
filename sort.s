@@ -9,8 +9,6 @@ main:
 		// reserva memoria na pilha
 		sub rsp, 128
 		// ler nome do arquivo_entrada(argv[1])
-		// guardar argv
-		mov r12, rsi
 		// guarda valor de argv[1]
 		mov r13, [rsi+8]
 		//mov r14, [rsi+16]
@@ -72,18 +70,45 @@ main:
 			call fscanf@plt
 			
 			mov rdx, [rip + vector]
-			mov [rdx + rcx*4], [rbp - 56]
+			mov r19, [rbp - 56]
+			mov [rdx + rcx*4], r19
 			mov rcx, [rbp - 48]
 			inc rcx
 			jmp feed_vector
 		inc_loop_ext:
 			sort_vector_init:
 				mov rcx, 0
-				sort_vector:
-				mov [rbp - 64], rcx
-				mov rcx, [rbp - 64]
-				inc rcx
-				jmp sort_vector
+                                mov r15, [rbp - 40]
+				mov r18, [rbp - 40]
+				sub r18, 1
+			sort_vector:
+                                cmp rcx, r18
+                                mov [rbp - 64], rcx
+				je print_vector_init
+                                mov r16, r15
+                                sort_inner_loop_init:
+                                        mov r17, r15
+                                        inc r17
+					mov rcx, r17
+				sort_inner_loop:
+					cmp r17, 15
+					je inc_sort
+					mov rdx, [rip + vector]
+					mov r18, [rdx + rcx*4]
+                                        mov r19, [rdx + r16*4]
+					cmp r18, r19
+					jg part_2_inner
+					mov r16, 17
+				part_2_inner:
+					cmp r16, r15
+					je inc_inner
+				inc_inner_loop:
+					inc rcx
+					jmp sort_inner_loop
+				inc_sort:
+					mov rcx, [rbp - 64]
+					inc rcx
+					jmp sort_vector
 			print_vector_init:
 				mov rcx, 0
 			print_vector:
@@ -110,20 +135,20 @@ main:
 	ret
 
 .section .bss
-vector:
-.8byte
-.section .rodata  
-appendmode:
-.string "a"
-readmode:
-.string "r"
-intformat:
-.string "%d"
-output_one_intformat:
-.string "%d\n"
-output_index:
-.string "[%d]"
-endl:
-.string "\n"
-intformat_endl:
-.string "%d\n"
+	vector:
+		.8byte
+.section .rodata
+	appendmode:
+		.string "a"
+	readmode:
+		.string "r"
+	intformat:
+		.string "%d"
+	output_one_intformat:
+		.string "%d\n"
+	output_index:
+		.string "[%d]"
+	endl:
+		.string "\n"
+	intformat_endl:
+		.string "%d\n"
