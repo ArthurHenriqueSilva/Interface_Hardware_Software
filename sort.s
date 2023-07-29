@@ -7,7 +7,7 @@ main:
 	push rbp
 	mov rbp, rsp
 	// reserva memoria na pilha
-	sub rsp, 256
+	sub rsp, 128
 	// ler nome do arquivo_entrada(argv[1])
 	// guardar argv
 	mov r12, rsi
@@ -54,13 +54,38 @@ main:
 
             mov rdi, [rbp - 32]
             lea rsi, [rip + intformat]
-            lea rdx, [rbp - 64]
+            lea rdx, [rbp - 40]
             call fscanf@plt
+	    mov r14, [rbp - 40]
+            shl r14, 2
+            //mov [rbp - 40], r14
             //lea rdi, [rip + intformat]
-            //mov rsi, [rbp - 64]
+            //mov rsi, [rbp - 40]
             //call printf@plt
-            lea rdi, [rip + endl]
-            call printf@plt
+            mov rdi, r14
+            call malloc@plt
+            mov [rip + vector], rax
+            feed_vector_init:
+                mov rcx, 0
+            feed_vector:
+                cmp rcx, r14
+                je endl2
+                mov rcx, [rbp - 48]
+                mov rdi, [rbp - 32]
+                lea rsi, [rbp + intformat]
+                lea rdx, [rbp - 56]
+                call fscanf@plt
+                lea rdi, [rip + intformat]
+                mov rsi, [rbp - 56]
+                call printf@plt
+                lea rdi, [rip + endl]
+                call printf@plt
+                mov rcx, [rbp - 48]
+                inc rcx
+                jmp feed_vector
+            endl2:
+	        lea rdi, [rip + endl]
+                call printf@plt
 	   
             mov rcx, [rbp - 8]
             inc rcx
@@ -71,7 +96,7 @@ main:
  	    pop rbp
 	    ret
 
-.section segment
+.section .bss
 vector:
     .8byte
 .section .rodata  
