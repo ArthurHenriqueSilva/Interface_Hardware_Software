@@ -45,15 +45,10 @@ main:
 			lea rsi, [rip + intformat]
 			lea rdx, [rbp - 56]
 			call fscanf@plt
-			mov rdx, [rip + vector]
-			mov r10, [rbp - 56]
-			mov [rdx + rcx*4], r10
-			lea rdi, [rip + intformat]
-			mov rsi, [rdx + rcx*4]
-			call printf@plt
-			lea rdi, [rip + space]
-			call printf@plt
 			mov rcx, [rbp - 48]
+			mov r10, [rbp - 56]
+			mov rdx, [rip + vector]
+			mov [rdx + rcx*4], r10
 			inc rcx
 			jmp feed_vector
 		print_vector_init:
@@ -61,14 +56,13 @@ main:
 		print_vector:
 			cmp rcx, [rbp - 40]
 			je inc_loop_ext
-			mov [rbp - 64], rcx
+			mov [rbp - 48], rcx
 			lea rdi, [rip + intformat]
-			lea rdx, [rip + vector]
 			mov rsi, [rdx + rcx*4]
 			call printf@plt
 			lea rdi, [rip + space]
 			call printf@plt
-			mov rcx, [rbp - 64]
+			mov rcx, [rbp - 48]
 			inc rcx
 			jmp print_vector
 		inc_loop_ext:
