@@ -3,7 +3,8 @@
 // Main function
 .global main
 main:
-		push rbp
+		
+  		push rbp
 		mov rbp, rsp
 		sub rsp, 128
 		mov r8, [rsi+8]
