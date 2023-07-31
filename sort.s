@@ -3,18 +3,19 @@
 // Main function
 .global main
 main:
-		push rbp
-		mov rbp, rsp
-		sub rsp, 128
-		mov r8, [rsi+8]
-		mov rdi, r8
-		lea rsi, [rip + readmode]
-		call fopen@plt
-		mov [rbp - 32], rax
-		mov rdi, [rbp - 32]
-		lea rsi, [rip + intformat]
-		lea rdx, [rbp - 16]
-		call fscanf@plt
+	push rbp
+	mov rbp, rsp
+	sub rsp, 256
+	
+	mov rdi, [rsi + 8]
+	lea rsi, [rip + readmode]
+	call fopen@plt
+	mov [rbp - 8], rax
+	
+	mov rdi, [rbp - 8]
+	lea rsi, [rip + intformat]
+	lea rdx, [rbp - 16]
+	call fscanf@plt
 	loop_externo_init:
 		mov rcx, 0
 	loop_externo:
@@ -22,53 +23,60 @@ main:
 		je done
 		lea rdi, [rip + output_index]
 		mov rsi, rcx
-		mov [rbp - 8], rcx
+		mov [rbp - 24], rcx
 		call printf@plt
-
-		mov rdi, [rbp - 32]
+		
+		mov rdi, [rbp - 8]
 		lea rsi, [rip + intformat]
-		lea rdx, [rbp - 40]
+		lea rdx, [rbp - 32]
 		call fscanf@plt
-		mov r9, [rbp - 40]
-		shl r9, 2
-
-		mov rdi, r9
+		
+		mov r8, [rbp - 32]
+		shl r8, 2
+		mov rdi, r8
 		call malloc@plt
 		mov [rip + vector], rax
-		feed_vector_init:
+		
+		feed_v_init:
 			mov rcx, 0
-		feed_vector:
-			cmp rcx, [rbp - 40]
-			mov [rbp - 48], rcx
-			je print_vector_init
-			mov rdi, [rbp - 32]
+		feed_v:
+			cmp rcx, [rbp - 32]
+			je print_v_init
+			mov [rbp - 40], rcx
+			
+			mov rdi, [rbp - 8]
 			lea rsi, [rip + intformat]
-			lea rdx, [rbp - 56]
+			lea rdx, [rbp - 48]
 			call fscanf@plt
-			mov rcx, [rbp - 48]
-			mov r10, [rbp - 56]
+			mov r9, [rbp - 48]
+			
 			mov rdx, [rip + vector]
-			mov [rdx + rcx*4], r10
+			mov [rdx + rcx*4], r9
+			
+			mov rcx, [rbp - 40]
 			inc rcx
-			jmp feed_vector
-		print_vector_init:
+			jmp feed_v
+		print_v_init:
 			mov rcx, 0
-		print_vector:
-			cmp rcx, [rbp - 40]
-			je inc_loop_ext
-			mov [rbp - 48], rcx
+		print_v:
+			cmp rcx, [rbp - 32]
+			je inc_loop_externo
+			mov [rbp - 40], rcx
+			
+			mov rdx, [rip + vector]
+			mov r9, [rdx + rcx*4]
+
 			lea rdi, [rip + intformat]
-			mov rsi, [rdx + rcx*4]
+			mov rsi, r9
 			call printf@plt
-			lea rdi, [rip + space]
-			call printf@plt
-			mov rcx, [rbp - 48]
+			
+			mov rcx, [rbp - 40]
 			inc rcx
-			jmp print_vector
-		inc_loop_ext:
+			jmp print_v
+		inc_loop_externo:
 			lea rdi, [rip + endl]
 			call printf@plt
-			mov rcx, [rbp - 8]
+			mov rcx, [rbp - 24]
 			inc rcx
 			jmp loop_externo
 	done:
